@@ -2,8 +2,9 @@ import { useState, useMemo, useEffect, useRef } from 'react';
 import { format, subMonths, subYears, startOfYear } from 'date-fns';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine } from 'recharts';
 import { X, AlertCircle, BarChart3, Activity, Command, Layers } from 'lucide-react';
-import { resolveTickers } from './lib/genAIService';
+import { resolveTickers } from './lib/tickerResolution';
 import { cn } from './lib/utils';
+import { computePercentageGrowth } from './lib/calculations';
 import { motion, AnimatePresence } from 'motion/react';
 
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ec4899', '#8b5cf6'];
@@ -66,15 +67,23 @@ export default function App() {
        return;
     }
 
-    if (!start || !end) {
-      setError('Please provide both start and end dates.');
-      return;
+    let validEnd = end.length === 10 ? new Date(`${end}T12:00:00`) : new Date(end);
+    let validStart = start.length === 10 ? new Date(`${start}T12:00:00`) : new Date(start);
+    
+    if (Number.isNaN(validEnd.getTime()) || Number.isNaN(validStart.getTime())) {
+      validEnd = new Date();
+      validStart = subMonths(validEnd, 1);
+    }
+    
+    if (validStart.getTime() >= validEnd.getTime()) {
+      validStart = new Date(validEnd.getTime() - 24 * 60 * 60 * 1000);
     }
 
-    if (new Date(start) > new Date(end)) {
-      setError('Start date must be before end date.');
-      return;
-    }
+    const finalStart = format(validStart, 'yyyy-MM-dd');
+    const finalEnd = format(validEnd, 'yyyy-MM-dd');
+
+    if (finalStart !== start) setStartDate(finalStart);
+    if (finalEnd !== end) setEndDate(finalEnd);
 
     setLoading(true);
     setError(null);
@@ -86,13 +95,21 @@ export default function App() {
       fetchList.push(candidateTicker);
     }
 
+    if (fetchList.length === 0) {
+      setChartData([]);
+      setTickers([]);
+      setTickerMeta({});
+      setLoading(false);
+      return;
+    }
+
     try {
       const resolvedList = await resolveTickers(fetchList);
       
       const response = await fetch('/api/stock-data', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ tickers: resolvedList, start, end })
+        body: JSON.stringify({ tickers: resolvedList, start: finalStart, end: finalEnd })
       });
       
       if (!response.ok) throw new Error('Failed to fetch stock data (Server Error)');
@@ -139,7 +156,7 @@ export default function App() {
         }
       });
 
-      const requestedStartMs = new Date(start).getTime();
+      const requestedStartMs = validStart.getTime();
       let appliedStartMs = requestedStartMs;
 
       // Check if the limiting ticker's start date is significantly after requested (e.g., > 5 days)
@@ -152,20 +169,13 @@ export default function App() {
 
       finalAcceptedTickers.forEach(orig => {
         const series = rawSeries[orig];
-        
-        // Find valid points from the applied start date
-        const validPoints = series.filter((p: any) => new Date(p.date).getTime() >= appliedStartMs - 12 * 60 * 60 * 1000); 
-        
-        if (validPoints.length === 0) return; // Should not happen given commonStartMs logic
-        
-        const baseline = validPoints[0].adjClose;
+        const processedPoints = computePercentageGrowth(series, appliedStartMs);
 
-        validPoints.forEach((point: any) => {
-          const d = point.date.split('T')[0];
+        processedPoints.forEach(point => {
+          const d = point.date;
           if (!merged[d]) merged[d] = { date: d };
-          const price = point.adjClose;
-          merged[d][`${orig}_pct`] = ((price - baseline) / baseline) * 100;
-          merged[d][`${orig}_price`] = price;
+          merged[d][`${orig}_pct`] = point.pct;
+          merged[d][`${orig}_price`] = point.price;
         });
       });
 

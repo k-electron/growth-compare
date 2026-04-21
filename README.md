@@ -1,20 +1,32 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Growth Compare
 
-# Run and deploy your AI Studio app
+A financial visualization tool to compare stock performance over time. Growth Compare calculates stock growth as a percentage offset from an initial date, providing clear baseline comparisons for arbitrary time windows to surface actual long-term relative outperformance.
 
-This contains everything you need to run your app locally.
+## Hosted Version
 
-View your app in AI Studio: https://ai.studio/apps/cee44fbc-475d-429c-a2f1-804214113080
+A hosted version of the site is available at: [https://growthcompare.pages.dev](https://growthcompare.pages.dev)
 
-## Run Locally
+## Features
+- **Arbitrary Time Windows**: Customize your start and end dates automatically, with baseline 0% shifts depending on dynamic availability overlap.
+- **Multiple Timeframe Presets**: Click-to-adjust 1M, 3M, 6M, YTD, 1Y, 5Y, and 10Y timeframes.
+- **Corporate Action Verification**: Accounts for events via the backing historical charting APIs.
+- **Auto Ticker Adjustments**: Safely limits to a cyclic queue of up to 5 valid tickers, dropping inactive inputs while actively resolving symbol rotations (e.g. FB -> META) seamlessly prior to chart hydration.
+- **URL Syncing**: Hot-links date fields and selected tickers right into the native URL query string, supporting immediate pre-loading and shareable chart snapshots.
 
-**Prerequisites:**  Node.js
-
+## Running Locally
 
 1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+   ```bash
+   npm install
+   ```
+
+2. Start the development server:
+   ```bash
+   npm run dev
+   ```
+
+3. Build for production:
+   ```bash
+   npm run build
+   npm run start
+   ```
