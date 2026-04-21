@@ -1,0 +1,6 @@
+{
+  "name": "Growth Compare",
+  "description": "An artistic, robust financial chart application that compares stock price percentage growth over custom timeframes, intelligently handling corporate actions and ticker changes.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
