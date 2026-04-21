@@ -5,8 +5,8 @@ esbuild.build({
   bundle: true,
   platform: "node",
   target: "node18",
-  format: "cjs",
-  outfile: "dist/server.cjs",
+  format: "esm",
+  outfile: "dist/server.js",
   external: [
     "express",
     "vite",

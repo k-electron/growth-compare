@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx server.ts",
-    "start": "node dist/server.cjs",
+    "start": "node dist/server.js",
     "build": "vitest run && vite build && tsx build-server.ts",
     "preview": "npm run start",
     "clean": "rm -rf dist",

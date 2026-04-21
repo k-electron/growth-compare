@@ -32,6 +32,7 @@ A hosted version of the site is available at: [https://growthcompare.pages.dev](
    npm run preview
    ```
 
-### Cloudflare Pages Deployment
-This project has been structured support Cloudflare Pages perfectly. 
-We provide a `functions/api/stock-data.ts` natively configured to hook into Cloudflare's Edge architecture. If you use `wrangler pages dev dist` locally, it will automatically serve this edge-function safely preventing static 405 Method errors.
+### Production Deployment (Node.js)
+This project requires a standard Node.js runtime environment (like Google Cloud Run, Heroku, or Render) due to the heavy backend data-fetching operations inside `server.ts` which proxy Yahoo Finance API calls. 
+
+Since it uses native server-side libraries, deploying to pure edge computing environments (like Cloudflare Pages or Vercel Edge) directly is not advised out-of-the-box because they do not fully polyfilled APIs (like `__dirname` and deep filesystem calls required by dependencies). Ensure your hosting environment boots via `npm run start` and serves `dist/server.js`!
