@@ -7,7 +7,7 @@
     "dev": "tsx server.ts",
     "start": "node dist/server.cjs",
     "build": "vitest run && vite build && tsx build-server.ts",
-    "preview": "vite preview",
+    "preview": "npm run start",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit",
     "test": "vitest run"

@@ -20,13 +20,18 @@ A hosted version of the site is available at: [https://growthcompare.pages.dev](
    npm install
    ```
 
-2. Start the development server:
+2. Start the development server (runs both frontend and the Express backend):
    ```bash
    npm run dev
    ```
+   *Note: Using standard `vite` natively will result in a 405 Method Not Allowed error because the application requires the specific Express backend runtime on `/api/stock-data` to scrape Yahoo Finance natively.*
 
-3. Build for production:
+3. Build and Preview for production:
    ```bash
    npm run build
-   npm run start
+   npm run preview
    ```
+
+### Cloudflare Pages Deployment
+This project has been structured support Cloudflare Pages perfectly. 
+We provide a `functions/api/stock-data.ts` natively configured to hook into Cloudflare's Edge architecture. If you use `wrangler pages dev dist` locally, it will automatically serve this edge-function safely preventing static 405 Method errors.
